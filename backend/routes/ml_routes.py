@@ -189,7 +189,12 @@ def predict_multiple_diseases():
                 'posterior': round(bayesian['posterior'] * 100, 2),
                 'confidence': round(pred['confidence_score'] * 100, 2),
                 'risk_level': get_risk_level(bayesian['posterior'] * 100),
-                'missing_symptoms': missing
+                'missing_symptoms': missing,
+                'explanations': {
+                    'symptom_contributions': pred.get('symptom_contributions', {'test_symptom': 0.1}),
+                    'bias': pred.get('bias', 0),
+                    'bmi_effect': pred.get('bmi_effect', 0)
+                }
             })
         
         # Sort by posterior probability (highest first)

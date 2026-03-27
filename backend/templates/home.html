@@ -173,6 +173,26 @@
                             </div>
                         </div>
 
+                        <!-- AI Explanation -->
+                        <div class="card bg-light mb-3 shadow-sm border-0" id="ai-explanation-card">
+                            <div class="card-body">
+                                <h3 class="h6 mb-3">
+                                    <i class="fas fa-brain me-2"></i>AI Explanation
+                                </h3>
+                                <p class="small text-muted mb-3">How each selected symptom contributed to this prediction:</p>
+                                <div id="symptom-contributions-list" class="list-group list-group-flush bg-transparent">
+                                    <!-- Dynamically populated -->
+                                </div>
+                                <div id="model-contributions" class="mt-3 pt-3 border-top">
+                                    <small class="text-muted">
+                                        <strong>Model Components:</strong><br>
+                                        Bias: <span id="bias-value">--</span> | 
+                                        BMI Effect: <span id="bmi-effect-value">--</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Risk Assessment -->
                         <div class="card bg-light mb-3 shadow-sm border-0">
                             <div class="card-body text-center">
@@ -368,6 +388,7 @@
 
     function displayResults(data) {
         const predictions = data.predictions;
+        window.allPredictions = predictions; // Store for detailed view
         const listContainer = document.getElementById('prediction-list');
         let html = '';
 
@@ -455,6 +476,29 @@
         } else {
             missingCard.style.display = 'none';
         }
+
+        // AI Explanation
+        const explanations = pred.explanations || {};
+        const contributionsList = document.getElementById('symptom-contributions-list');
+        const contributions = explanations.symptom_contributions || {};
+        if (Object.keys(contributions).length > 0) {
+            let html = '';
+            Object.entries(contributions).forEach(([symptom, weight]) => {
+                const symptomName = symptom.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center small py-2 px-0">
+                        <span>${symptomName}</span>
+                        <span class="badge bg-success rounded-pill">+${weight.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            contributionsList.innerHTML = html;
+        } else {
+            contributionsList.innerHTML = '<div class="list-group-item small py-2">No symptom contributions available.</div>';
+        }
+
+        document.getElementById('bias-value').textContent = explanations.bias ? explanations.bias.toFixed(2) : '--';
+        document.getElementById('bmi-effect-value').textContent = explanations.bmi_effect ? explanations.bmi_effect.toFixed(2) : '--';
 
         document.getElementById('detailed-analysis').style.display = 'block';
 

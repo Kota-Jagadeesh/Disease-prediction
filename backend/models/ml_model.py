@@ -234,6 +234,9 @@ class DiseaseMLModel:
         prior = min(0.95, max(0.05, raw_probability))
         likelihood = 0.75 + (raw_probability * 0.20)
         
+        # Explainable AI: symptom contributions
+        symptom_contributions = {symptom: symptom_weights[symptom] for symptom in matched_symptoms}
+        
         return {
             'disease': disease,
             'raw_probability': float(raw_probability),
@@ -245,7 +248,9 @@ class DiseaseMLModel:
             'confidence_score': self._calculate_confidence(len(matched_symptoms), raw_probability, bmi),
             'bmi': round(bmi, 2) if bmi else None,
             'bmi_category': bmi_category,
-            'bmi_effect': bmi_effect
+            'bmi_effect': bmi_effect,
+            'symptom_contributions': symptom_contributions,
+            'bias': bias
         }
     
     def _calculate_confidence(self, num_symptoms: int, probability: float, bmi : float = None) -> float:
